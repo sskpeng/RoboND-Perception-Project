@@ -70,14 +70,30 @@ def pcl_callback(pcl_msg):
     passthrough_1.set_filter_limits(axis_1_min, axis_1_max)
     cloud_filtered = passthrough_1.filter()
 
-    # X direction
+    # Y direction
     passthrough_2 = cloud_filtered.make_passthrough_filter()
     filter_axis_2 = 'y'
     passthrough_2.set_filter_field_name(filter_axis_2)
-    axis_2_min = -10
-    axis_2_max = 10
+    axis_2_min = -0.5
+    axis_2_max = 0.5
     passthrough_2.set_filter_limits(axis_2_min, axis_2_max)
     cloud_filtered = passthrough_2.filter()
+
+    # X direction
+    passthrough_3 = cloud_filtered.make_passthrough_filter()
+    filter_axis_3 = 'x'
+    passthrough_3.set_filter_field_name(filter_axis_3)
+    axis_3_min = 0.3
+    axis_3_max = 1.1
+    passthrough_3.set_filter_limits(axis_3_min, axis_3_max)
+    cloud_filtered = passthrough_3.filter()
+
+    # Add Outlier Removal Filter
+    outlier_filter = cloud_filtered.make_statistical_outlier_filter()
+    outlier_filter.set_mean_k(50)
+    x = 0.2
+    outlier_filter.set_std_dev_mul_thresh(x)
+    cloud_filtered = outlier_filter.filter()
 
     # TODO: RANSAC Plane Segmentation
     seg = cloud_filtered.make_segmenter()
@@ -228,7 +244,7 @@ if __name__ == '__main__':
 
 
     # TODO: Create Publishers
-    pcl_test_pub = rospy.Publisher("/pcl_test", PointCloud2, queue_size=1)
+    # pcl_test_pub = rospy.Publisher("/pcl_test", PointCloud2, queue_size=1)
 
     pcl_objects_pub = rospy.Publisher("/pcl_objects", PointCloud2, queue_size=1)
     pcl_table_pub = rospy.Publisher("/pcl_table", PointCloud2, queue_size=1)
