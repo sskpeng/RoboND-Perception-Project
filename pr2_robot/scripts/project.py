@@ -46,6 +46,19 @@ def send_to_yaml(yaml_filename, dict_list):
     with open(yaml_filename, 'w') as outfile:
         yaml.dump(data_dict, outfile, default_flow_style=False)
 
+# To merge two point cloud_objects
+def merge_cloud(cloud1, cloud2):
+    merged_cloud_list = []
+    for point in cloud1:
+        merged_cloud_list.append(point)
+
+    for point in cloud2:
+        merged_cloud_list.append(point)
+
+    merged_cloud = pcl.PointCloud_PointXYZRGB()
+    merged_cloud.from_list(merged_cloud_list)
+    return merged_cloud
+
 # Callback function for your Point Cloud Subscriber
 def pcl_callback(pcl_msg):
 
@@ -142,10 +155,15 @@ def pcl_callback(pcl_msg):
     ros_cloud_table = pcl_to_ros(cloud_table)
     ros_cluster_cloud = pcl_to_ros(cluster_cloud)
 
+    # Prepare obstacle point cloud if just consider the table and all object as obstacles
+    # obstacle_cloud = merge_cloud(cloud_table, cloud_objects)
+    # ros_cloud_obstacle = pcl_to_ros(obstacle_cloud)
+
     # TODO: Publish ROS messages
     pcl_objects_pub.publish(ros_cloud_objects)
     pcl_table_pub.publish(ros_cloud_table)
     pcl_cluster_pub.publish(ros_cluster_cloud)
+    # pcl_obstacle_pub.publish(ros_cloud_obstacle)
 
 # Exercise-3 TODOs:
 
@@ -191,12 +209,12 @@ def pcl_callback(pcl_msg):
     # Could add some logic to determine whether or not your object detections are robust
     # before calling pr2_mover()
     try:
-        pr2_mover(detected_objects) # detected_objects_list
+        pr2_mover(detected_objects, cloud_table) # detected_objects_list
     except rospy.ROSInterruptException:
         pass
 
 # function to load parameters and request PickPlace service
-def pr2_mover(object_list):
+def pr2_mover(object_list, cloud_table):
 
     # TODO: Initialize variables
     test_scene_num = Int32()
@@ -225,6 +243,7 @@ def pr2_mover(object_list):
 
 
     # TODO: Rotate PR2 in place to capture side tables for the collision map
+    # world_loint_pub.publish(-90 * math.pi / 180)
 
     # TODO: Loop through the pick list
     for i in range(len(object_list_param)):
@@ -259,9 +278,22 @@ def pr2_mover(object_list):
         elif object_group == 'green':
             arm_name.data = 'right'
 
-        # TODO: Create a list of dictionaries (made with make_yaml_dict()) for later output to yaml format
-        yaml_dict = make_yaml_dict(test_scene_num, arm_name, object_name, pick_pose, place_pose)
-        dict_list.append(yaml_dict)
+        # # TODO: Create a list of dictionaries (made with make_yaml_dict()) for later output to yaml format
+        # yaml_dict = make_yaml_dict(test_scene_num, arm_name, object_name, pick_pose, place_pose)
+        # dict_list.append(yaml_dict)
+
+        ## Update obstacles
+        obstacle_cloud = cloud_table
+        if i < len(object_list_param)-1:
+            k=0
+            for k in range(i+1, len(object_list)):
+                print "list=",len(object_list),", k=",k,"i=",i
+                object1 = object_list[k]
+                pcl_object1 = ros_to_pcl(object1.cloud)
+                obstacle_cloud = merge_cloud(obstacle_cloud, pcl_object1)
+        ros_cloud_obstacle = pcl_to_ros(obstacle_cloud)
+        pcl_obstacle_pub.publish(ros_cloud_obstacle)
+
 
         # Wait for 'pick_place_routine' service to come up
         rospy.wait_for_service('pick_place_routine')
@@ -300,6 +332,12 @@ if __name__ == '__main__':
 
     object_markers_pub = rospy.Publisher("/object_markers", Marker, queue_size=1)
     detected_objects_pub = rospy.Publisher("/detected_objects", DetectedObjectsArray, queue_size=1)
+
+    # added for updating detected obstacles
+    pcl_obstacle_pub = rospy.Publisher("/pr2/3D_map/points", PointCloud2, queue_size=1)
+
+    # added for commanding robot to rotate in world joint
+    world_loint_pub = rospy.Publisher("/pr2/world_joint_controller/command", Float64, queue_size=10)
 
     # TODO: Load Model From disk
     model = pickle.load(open('model.sav', 'rb'))
