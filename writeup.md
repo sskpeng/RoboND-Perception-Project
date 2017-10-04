@@ -15,7 +15,7 @@
 
 
 
-# Exercuse 1, 2 and 3 Pipeline Implemented:
+# Exercise 1, 2 and 3 Pipeline Implemented:
 In the RoboND-Perception-Exercise repository, a static set of image data are provided to practice implementing the perception pipeline. In the first two exercieses, we implemented several perception filtering functions to segment RGB images. Then in the exercise 3, we use Support Vector Machine (SVM) to perform object recognition.
 
 Here is the original tabletop image.
@@ -24,25 +24,55 @@ Here is the original tabletop image.
 These functions include:
 
 #### 1. VoxelGrid Downsamplying Filter
-To reduce the sampling amount in the imaging process.
+This function is used to reduce the sampling amount in the imaging process. In the picture below, the voxel grid size is set to 0.01 cubic meter.
+
+```
+	vox = cloud.make_voxel_grid_filter()
+	LEAF_SIZE = 0.01
+	vox.set_leaf_size(LEAF_SIZE, LEAF_SIZE, LEAF_SIZE)
+```
+
 ![alt text][image2]
 #### 2. PassThrough Filter
-To filter out and keep only image data from certain area in space.
+This function is used to filter out and keep only image data from certain area in space. The following codes are for setting up a filter in Z-axis. In the project, three separated filters are used to limit the space in X, Y and Z directions.
+
+```
+  passthrough_1 = cloud_filtered.make_passthrough_filter()
+	filter_axis_1 = 'z'
+	passthrough_1.set_filter_field_name(filter_axis_1)
+	axis_1_min = 0.6
+	axis_1_max = 1.2
+	passthrough_1.set_filter_limits(axis_1_min, axis_1_max)
+```
 ![alt text][image3]
 #### 3. RANASAC Plane Fitting
 To identify points belong to a particular model from the entire image dataset.
-The table fits the rectangle shape and is extracted from the dataset.
+The table fits the rectangle plane and is extracted from the dataset from all the objects above or below it.
+
+```
+	seg = cloud_filtered.make_segmenter()
+	seg.set_model_type(pcl.SACMODEL_PLANE)
+	seg.set_method_type(pcl.SAC_RANSAC)
+	max_distance = 0.01
+	seg.set_distance_threshold(max_distance)
+```
 ![alt text][image4]
-Objects in the remaining dataset
+Here is the remaining objects in the dataset.
 ![alt text][image5]
 
 #### 4. Outlier Removal Filter
-To remove noise effect due to external factors. Since the provided image has no noise, there is no need to implemeted in the exercise. But this filter will be used in the Perception project.
+To remove noise effect due to external factors. Since the provided image has no noise, there is no need to implemented in the exercise. But this filter will be used in the Perception project.
 
 #### 5. Euclidean Clustering
 Clustering is a process to find similarities among individual points.
-Density-Based Spatial Clustering of Applications with Noise (DBSACN). Also known as "Euclidean Clustering". This algorithm is a nice alternative to k-means when you don' t know how many clusters to expect in your data, but you do know something about how the points should be clustered in terms of density (distance between points in a cluster).
+Density-Based Spatial Clustering of Applications with Noise (DBSACN), also known as "Euclidean Clustering", is used in this exercise and the following project for clustering points based on their density or distance between point in a cluster.
 
+```
+	ec = white_cloud.make_EuclideanClusterExtraction()
+	ec.set_ClusterTolerance(0.05)
+	ec.set_MinClusterSize(10)
+	ec.set_MaxClusterSize(1000)
+```
 Here is the entire point cloud published in ROS in rviz.
 ![alt text][image6]
 
@@ -52,47 +82,20 @@ Here is the point cloud published to the ROS after clustering.
 
 #### 6. Support Vector Machine (SVM)
 SVM is a supervised machine learning algorithm to be used to trained for object recognition.
+
+In this exercise, we first run the file `capture_feature.py` to capture the objects' features in rviz environment, and then run `train_svm.py ` to train SVM. The following pictures show the recognition result after training the SVM with 10 orientations for all of the seven objects and with using `hsv` instead of `xyz`. As the result shows, the success rate is around 70~80 %. Later in the project, I tried to capture 25 orientations for the 8 objects and could reach 90 % success rate.
+
 ![alt text][image8]
 ![alt text][image9]
 ![alt text][image10]
 
 
-	
+# Exercuse 1, 2 and 3 Pipeline Implemented:
 
-# Extra Challenges: Complete the Pick & Place
-7. To create a collision map, publish a point cloud to the `/pr2/3d_map/points` topic and make sure you change the `point_cloud_topic` to `/pr2/3d_map/points` in `sensors.yaml` in the `/pr2_robot/config/` directory. This topic is read by Moveit!, which uses this point cloud input to generate a collision map, allowing the robot to plan its trajectory.  Keep in mind that later when you go to pick up an object, you must first remove it from this point cloud so it is removed from the collision map!
-8. Rotate the robot to generate collision map of table sides. This can be accomplished by publishing joint angle value(in radians) to `/pr2/world_joint_controller/command`
-9. Rotate the robot back to its original state.
-10. Create a ROS Client for the “pick_place_routine” rosservice.  In the required steps above, you already created the messages you need to use this service. Checkout the [PickPlace.srv](https://github.com/udacity/RoboND-Perception-Project/tree/master/pr2_robot/srv) file to find out what arguments you must pass to this service.
-11. If everything was done correctly, when you pass the appropriate messages to the `pick_place_routine` service, the selected arm will perform pick and place operation and display trajectory in the RViz window
-12. Place all the objects from your pick list in their respective dropoff box and you have completed the challenge!
-13. Looking for a bigger challenge?  Load up the `challenge.world` scenario and see if you can get your perception pipeline working there!
+### Here explain the goal of this project
 
-## [Rubric](https://review.udacity.com/#!/rubrics/1067/view) Points
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+### Here explain the code layout
 
----
-### Writeup / README
+### Here shows the result of required output for object recognition
 
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  
-
-You're reading it!
-
-### Exercise 1, 2 and 3 pipeline implemented
-#### 1. Complete Exercise 1 steps. Pipeline for filtering and RANSAC plane fitting implemented.
-
-#### 2. Complete Exercise 2 steps: Pipeline including clustering for segmentation implemented.  
-
-#### 2. Complete Exercise 3 Steps.  Features extracted and SVM trained.  Object recognition implemented.
-Here is an example of how to include an image in your writeup.
-
-![demo-1](https://user-images.githubusercontent.com/20687560/28748231-46b5b912-7467-11e7-8778-3095172b7b19.png)
-
-### Pick and Place Setup
-
-#### 1. For all three tabletop setups (`test*.world`), perform object recognition, then read in respective pick list (`pick_list_*.yaml`). Next construct the messages that would comprise a valid `PickPlace` request output them to `.yaml` format.
-
-And here's another image!
-![demo-2](https://user-images.githubusercontent.com/20687560/28748286-9f65680e-7468-11e7-83dc-f1a32380b89c.png)
-
-Spend some time at the end to discuss your code, what techniques you used, what worked and why, where the implementation might fail and how you might improve it if you were going to pursue this project further.  
+### Here shows the additional function of the code
