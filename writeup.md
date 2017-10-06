@@ -99,10 +99,15 @@ In this exercise, we first run the file `capture_feature.py` to capture the obje
 
 ### Here explain the code layout
 
-### Here shows the result of required output for object recognition
+### Here shows the results of required output for object recognition
 
 ![alt text][image11]
 ![alt text][image12]
 ![alt text][image13]
 
+In addition, the output.yaml files are placed under /output folder.
+
 ### Here shows the additional function of the code
+
+Rotates robot to capture obstacles surrounding itself.
+Brocast the obstacels including the tables, bins, and the objects on the table. The obstacles needs to be updated whenever robot comes to pick up next object, and also need to exclude the current object to pick.
