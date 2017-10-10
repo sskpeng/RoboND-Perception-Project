@@ -249,6 +249,7 @@
                   <slip>0</slip>
                 </ode>
               </torsional>
+              <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
             </friction>
             <bounce>
               <restitution_coefficient>0</restitution_coefficient>
@@ -633,6 +634,7 @@
                   <slip>0</slip>
                 </ode>
               </torsional>
+              <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
             </friction>
             <bounce>
               <restitution_coefficient>0</restitution_coefficient>

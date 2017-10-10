@@ -764,7 +764,7 @@
               <torsional>
                 <ode/>
               </torsional>
-              <ode/>
+              <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
             </friction>
           </surface>
         </collision>
@@ -819,7 +819,7 @@
               <torsional>
                 <ode/>
               </torsional>
-              <ode/>
+              <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
             </friction>
           </surface>
         </collision>
@@ -874,7 +874,7 @@
               <torsional>
                 <ode/>
               </torsional>
-              <ode/>
+              <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
             </friction>
           </surface>
         </collision>
@@ -929,7 +929,7 @@
               <torsional>
                 <ode/>
               </torsional>
-              <ode/>
+              <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
             </friction>
           </surface>
         </collision>
@@ -984,7 +984,7 @@
               <torsional>
                 <ode/>
               </torsional>
-              <ode/>
+              <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
             </friction>
           </surface>
         </collision>
@@ -1039,7 +1039,7 @@
               <torsional>
                 <ode/>
               </torsional>
-              <ode/>
+              <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
             </friction>
           </surface>
         </collision>
@@ -1094,7 +1094,7 @@
               <torsional>
                 <ode/>
               </torsional>
-              <ode/>
+              <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
             </friction>
           </surface>
         </collision>
@@ -1149,7 +1149,7 @@
               <torsional>
                 <ode/>
               </torsional>
-              <ode/>
+              <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
             </friction>
           </surface>
         </collision>
