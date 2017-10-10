@@ -1,6 +1,11 @@
 # Project: Perception Pick & Place
-### Purpose/goal of this Project
+### In this lesson, we practiced using several image process techniques to extract perception information and recognize objects from images. Then, with the object information, we can command the robot to perform pick and place motion accordingly.
 
+#### This project is separated into two sections - the exercise and the project itself.
+
+#### The main focus on the exercise part is to build the perception functions step by step. Here, we started from downsizing the image grid, reducing focus area, segmentation, RANASAC plane fitting, clustering, and then use a small machine learning technique to train the object features for object recognition.
+
+#### In the project, we implemented the perception functions to a well-prepared pick & place testing cell with a PR2 robot to test the object recognition function. We also used the same machine learning technique to train the potential objects in advance and let the robot to recognize and pick up the objects.
 ---
 [image1]: ./writeup_pic/pic01_tabletop.png
 [image2]: ./writeup_pic/pic02_downsampling.png
@@ -19,7 +24,7 @@
 
 
 ## Exercise 1, 2 and 3 Pipeline Implemented:
-In the RoboND-Perception-Exercise repository, a static set of image data are provided to practice implementing the perception pipeline. In the first two exercieses, we implemented several perception filtering functions to segment RGB images. Then in the exercise 3, we use Support Vector Machine (SVM) to perform object recognition.
+In the RoboND-Perception-Exercise repository, a static set of image data are provided to practice implementing the perception pipeline. In the first two exercises, we implemented several perception filtering functions to segment RGB images. Then in the exercise 3, we use Support Vector Machine (SVM) to perform object recognition.
 
 Here is the original tabletop image.
 ![alt text][image1]
@@ -60,6 +65,7 @@ max_distance = 0.01
 seg.set_distance_threshold(max_distance)
 ```
 ![alt text][image4]
+
 Here is the remaining objects in the dataset.
 ![alt text][image5]
 
@@ -93,11 +99,12 @@ In this exercise, we first run the file `capture_feature.py` to capture the obje
 ![alt text][image10]
 
 
-## Exercuse 1, 2 and 3 Pipeline Implemented:
+## Pick and Place Setup
 
-### Here explain the goal of this project
+### In the final project, we implemented the perception functions based on the practice and used the same machine learning technique to train the potential objects to a well-prepared pick & place testing cell with a PR2 robot to test the object recognition function. The goal for this project is to recognize objects in three different environment setups and required output for this project is to generate `output_x.yaml` files containing the location information of the objects.
 
-### Here explain the code layout
+### All the main programs are placed in the `project.py` file, which is edited based on the provided `project_template.py` file. In the file, we focused on three sections. In the `__init__` section, we added a few Publisher to broadcast the several different information for the other ROS programs in the project. The `pcl_callback` function is the main program for perception process. And the `pr2_mover` function is the function we command the robot to act based on the recognized object and their locations.
+
 
 ### Here shows the results of required output for object recognition
 
@@ -107,7 +114,32 @@ In this exercise, we first run the file `capture_feature.py` to capture the obje
 
 In addition, the output.yaml files are placed under /output folder.
 
-### Here shows the additional function of the code
+### Additional function for this project is to broadcast the obstacles surrounding the robot including the tables, bins, and also the recognized objects, so that the motion planner can take those into account and avoids collision in the pick and place motion.
 
-Rotates robot to capture obstacles surrounding itself.
-Brocast the obstacels including the tables, bins, and the objects on the table. The obstacles needs to be updated whenever robot comes to pick up next object, and also need to exclude the current object to pick.
+In the end, I implemented codes to rotate the robot around to capture obstacles surrounding itself. And broadcast the obstacles including the tables, bins, and the objects on the table. The obstacles should be updated for every pick and exclude the current object to pick.
+
+### Additional notes
+To execute the project, run the `rosrun` command while under the folder `RoboND-Perception-Project\pr2_robot\scripts` and then launch the project.
+
+```sf
+rosrun pr2_robot project.py
+roslaunch pr2_robot pick_and_place_project.launch
+```
+
+To change the world environment, modify `pr2_robot/launch/pick_place_project.launch`.
+
+```sf
+<arg name="world_name" value="$(find pr2_robot)/worlds/test1.world"/>
+<rosparam command="load" file="$(find pr2_robot)/config/pick_list_1.yaml"/>
+```
+
+To improve the robot grab, modify the files `pr2_robot/worlds/testx.world`, and add friction sections for each object.
+
+```sh
+<friction>
+  <torsional>
+    <ode/>
+  </torsional>
+  <ode mu="1.0" mu2="1.0" fdir1="0 0 1"/>
+</friction>
+```
